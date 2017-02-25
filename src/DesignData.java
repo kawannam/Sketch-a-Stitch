@@ -1,35 +1,28 @@
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+/*This class maintains the information needed for the header as 
+ * stitches are added. It converts the 
+ */
 public class DesignData {
-	
-	static int HEADER_SIZE    = 512;
+							//      -, 0, +
+static int[][] Y_ENCODER = {{0x400000, 0, 0x800000},  // 1
+							{0x004000, 0, 0x008000},  // 3
+							{0x100000, 0, 0x200000},  // 9
+							{0x001000, 0, 0x002000},  // 27
+							{0x000010, 0, 0x000004}}; // 81
 
-	static byte Y_1_PLUS      = (byte) 0x80;
-	static byte Y_1_MINUS     = (byte) 0x40;
-	static byte Y_9_PLUS      = (byte) 0x20;
-	static byte Y_9_MINUS     = (byte) 0x10;
-	static byte X_9_MINUS     = (byte) 0x08;
-	static byte X_9_PLUS      = (byte) 0x04;
-	static byte X_1_MINUS     = (byte) 0x02;
-	static byte X_1_PLUS      = (byte) 0x01;
-	
-	static byte Y_3_PLUS      = (byte) 0x80;
-	static byte Y_3_MINUS     = (byte) 0x40;
-	static byte Y_27_PLUS     = (byte) 0x20;
-	static byte Y_27_MINUS    = (byte) 0x10;
-	static byte X_27_MINUS    = (byte) 0x08;
-	static byte X_27_PLUS     = (byte) 0x04;
-	static byte X_3_MINUS     = (byte) 0x02;
-	static byte X_3_PLUS      = (byte) 0x01;
-	
-	static byte JUMP          = (byte) 0x80;
-	static byte COLOUR_CHANGE = (byte) 0x40;
-	static byte Y_81_PLUS     = (byte) 0x20;
-	static byte Y_81_MINUS    = (byte) 0x10;
-	static byte X_81_MINUS    = (byte) 0x08;
-	static byte X_81_PLUS     = (byte) 0x04;
-	static byte SET           = (byte) 0x03;
+static int[][] X_ENCODER = {{0x020000, 0, 0x010000},  // 1
+							{0x000100, 0, 0x000100},  // 3
+							{0x080000, 0, 0x040000},  // 9
+							{0x000800, 0, 0x000400},  // 27
+							{0x000008, 0, 0x000004}}; // 81
+
+static byte JUMP          = (byte) 0x000080;
+static byte COLOUR_CHANGE = (byte) 0x000040;
+static byte SET           = (byte) 0x000003;
+	static int HEADER_SIZE    = 512;
 	
 	FileOutputStream out;
 	ArrayList<Byte> design;
@@ -47,8 +40,8 @@ public class DesignData {
 	int lastY;
 	int firstX;
 	int firstY;
-	boolean seenFirst;
 	
+	boolean seenFirst;
 	
 	public DesignData() {
 		seenFirst = false;
@@ -63,116 +56,7 @@ public class DesignData {
 		minX = 0;
 		maxY = 0;
 		minY = 0;
-		fillStitch();
-		/*for(int i = 1; i < 10; i = i+2) {
-			straightStitch(0, (i), 10, (i), i);
-			straightStitch(10, (i +1), 0, ( i +1), (i+1));
-		}*/
-		//straightStitch(0, 0, 10, 0, 1);
-		//straightStitch(0, 2, 10, 2, 1);
-		//Point pss[] = {new Point( 0 , 0), new Point( 1, 0), new Point( 2, 0), new Point( 3, 0), new Point( 4, 0), new Point( 5, 0),
-		//		 new Point( 6, 0), new Point( 7, 0), new Point( 8, 0), new Point( 9, 0), new Point( 10, 0), new Point( 11, 0),
-		//		 new Point( 12, 0), new Point( 13, 0), new Point( 14, 0), new Point( 15, 0), new Point( 16, 0), new Point( 17, 0)};
-		//for( Point p: pss) {
-		//	addStitch(p.x, p.y, false, false);
-		//}
-		
-	}
-	
-	public void fillStitch() {
-			for(int l = 0; l < 10; l++){
-				for(int i = 0; i < 12; i++) {
-					addStitch(5, 0, false, false);
-				}
-				addStitch(0, 3, false, false);
-				for(int i = 0; i < 12; i++) {
-					addStitch(-5, 0, false, false);
-				}
-				addStitch(0, 3, false, false);
-			}
-			for(int l = 0; l < 10; l++){
-				for(int i = 0; i < 3; i++) {
-					addStitch(20, 0, false, false);
-				}
-				addStitch(0, 3, false, false);
-				for(int i = 0; i < 3; i++) {
-					addStitch(-20, 0, false, false);
-				}
-				addStitch(0, 3, false, false);
-			}
-	}
-	
-	public void fill() {
-		for(int k = 5; k < 10; k++){
-			for(int l = 0; l < 10; l++){
-				for(int i = 0; i < (80/k); i++) {
-					addStitch(k, 0, false, false);
-				}
-				addStitch(0, 3, false, false);
-				for(int i = 0; i < (80/k); i++) {
-					addStitch(-k, 0, false, false);
-				}
-				addStitch(0, 3, false, false);
-			}
-		}
-	}
-	
-	public void multiSquare() {
-		for(int k = 3; k < 13; k++){
-			for(int i = 0; i <= 10; i++) {
-				addStitch(k, 0, false, false);
-			}
-			for(int i = 0; i <= 10; i++) {
-				addStitch(0, k, false, false);
-			}
-			for(int i = 10; i >= 0; i--) {
-				addStitch(-k, 0, false, false);
-			}
-			for(int i = 10; i >= 0; i--) {
-				addStitch(0, -k, false, false);
-			}
-		}
-	}
-	
-	public void line() {
-		for(int i = 0; i <= 30; i++) {
-			addStitch(10, 0, false, false);
-		}
-		addStitch(0, 30, false, true);
-		addStitch(0, 30, false, true);
-		for(int i = 00; i >= -30; i--) {
-			addStitch(-10, 0, false, false);
-		}
-	}
-	
-	public void square() {
-		for(int i = -10; i <= 10; i++) {
-			addStitch(10, 0, false, false);
-		}
-		for(int i = -10; i <= 10; i++) {
-			addStitch(0, 10, false, false);
-		}
-		for(int i = 10; i >= -10; i--) {
-			addStitch(-10, 0, false, false);
-		}
-		for(int i = 10; i >= -10; i--) {
-			addStitch(0, -10, false, false);
-		}
-	}
-	
-	public void circle() {
-		for(int i = -10; i <= 10; i++) {
-			for(int j = 0; j <= 10; j++){
-				
-				addStitch(i, j, false, false);
-			}
-		}
-		for(int i = 10; i >= -10; i--) {
-			for(int j = -10; j <= 0; j++){
-				
-				addStitch(i, j, false, false);
-			}
-		}
+		//fillStitch();
 	}
 	
 	public byte[] getDesign() {
@@ -212,13 +96,14 @@ public class DesignData {
 			seenFirst = true;
 			firstX = x;
 			firstY = y;
+			lastX = firstX;
+			lastY = firstY;
 		}
-		Stitch s = new Stitch(x, y, colourChange, jump);
 		if( colourChange ) {
 			numberOfColourChanges++;
 		}
-		lastX = x;
-		lastY = y;
+		lastX += x;
+		lastY += y;
 		numberOfStitches++;
 
 		if( lastX > maxX ) {
@@ -233,7 +118,7 @@ public class DesignData {
 		if ( lastY < minY ) {
 			minY = lastY;
 		}
-		byte[] stitch = s.getStitch();
+		byte[] stitch = encodeStitch(x, y, colourChange, jump);
 		design.add(stitch[0]);
 		design.add(stitch[1]);
 		design.add(stitch[2]);
@@ -244,4 +129,28 @@ public class DesignData {
 				String.format("%8s", Integer.toBinaryString(stitch[2] & 0xFF)).replace(' ', '0'));
 				*/
 	}
+
+	public byte[] encodeStitch(int x, int y, boolean colourChange, boolean jump) {
+		int answer = SET;		
+		for(int i = 0; i < 5; i++) {
+			answer = answer | Y_ENCODER[i][numberToTri(y, i)];
+			answer = answer | X_ENCODER[i][numberToTri(x, i)];
+		}
+		if( colourChange ) answer = answer | COLOUR_CHANGE;
+		if( jump ) answer = answer | JUMP;
+		byte[] bytesToAdd = new byte[3];
+		bytesToAdd[0] = (byte)(answer & 0xFF);
+		bytesToAdd[1] = (byte)((answer >> 8) & 0xFF);
+		bytesToAdd[2] = (byte)((answer >> 16) & 0xFF);
+		return bytesToAdd;
+		}
+		
+		private int numberToTri(int n, int i) {
+		// (( floor( (n+121)/3^i) % 3 )
+		int answer = n + 121;
+		answer = (int) Math.floor((answer/(Math.pow((double)3, (double)i))));
+		answer = answer % 3;		
+		return answer;
+	}
+
 }

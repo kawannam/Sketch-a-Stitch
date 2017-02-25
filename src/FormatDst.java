@@ -1,18 +1,18 @@
 import java.io.FileOutputStream;
 import java.lang.StringBuilder;
 
-public class BasicStitches {
+public class FormatDst {
 	
 	DesignData dd;
 	
-	public BasicStitches() {
+	public FormatDst() {
 		dd = new DesignData();
-		
+		FillStitchDesign.everyStitch(dd);		
 	}
 	
 	public static void main(String[] args) {
-		BasicStitches bs = new BasicStitches();
-		bs.writeFile("test.dst");
+		FormatDst bs = new FormatDst();
+		bs.writeFile("everyStitch.dst");
 	}
 	
 	public void writeFile( String fileName ) {
